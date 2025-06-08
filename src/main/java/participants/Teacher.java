@@ -1,8 +1,8 @@
 package participants;
 
 public class Teacher extends Participants{
-    private int codeTeacher;
-    private static int codeTeacherCount = 0;
+    private int teacherCode;
+    private static int teacherCodeCount = 0;
 
 
     public Teacher(String name, String cpf) {
@@ -12,11 +12,11 @@ public class Teacher extends Participants{
     @Override
     public void register() {
         super.register();
-        codeTeacher = codeTeacherCount;
-        codeTeacherCount++;
+        teacherCode = teacherCodeCount;
+        teacherCodeCount++;
     }
 
     public int getCodeTeacher(){
-        return codeTeacher;
+        return teacherCode;
     }
 }

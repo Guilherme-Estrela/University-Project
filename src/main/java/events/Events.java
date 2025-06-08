@@ -7,6 +7,7 @@ import participants.Student;
 import participants.Teacher;
 
 import java.util.HashMap;
+import java.util.Vector;
 
 public abstract class Events implements IEvents{
     protected String name;
@@ -15,13 +16,15 @@ public abstract class Events implements IEvents{
     protected String description;
     protected int capacity;
     protected boolean online;
+    protected  boolean started = false;
 
-    protected int codeEvent;
-    protected static int codeEventCount;
+    protected int eventCode;
+    protected static int eventCodeCount;
 
     protected HashMap<Integer, IParticipants> participants = new HashMap<>();
     protected HashMap<Integer, IParticipants> ableParticipants = new HashMap<>();
-    protected HashMap<Integer, IParticipants> participantsWithCertificate = new HashMap<>();
+
+    public static HashMap<Integer ,IEvents> events = new HashMap<>();
 
     public Events(String name, String date, String location,
                   String description, int capacity, boolean online)
@@ -36,18 +39,52 @@ public abstract class Events implements IEvents{
 
     @Override
     public void register() {
-        this.codeEvent = codeEventCount;
-        codeEventCount++;
+        this.eventCode = eventCodeCount;
+        eventCodeCount++;
+        events.put(this.eventCode ,this);
+    }
+
+    @Override
+    public void registerParticipant(IParticipants participant){
+        try {
+            Preconditions.checkNotNull(participant, "This participant does not exist or are not able.");
+            Preconditions.checkArgument(!started,
+                    "This event has already started; there are no more spots available.");
+
+            if (this instanceof Course)
+                Preconditions.checkArgument(participant instanceof Student,
+                        "Only students can participate in courses!");
+
+            if(participants.size() == capacity)
+                throw new Exception("This event is full. We have no more vacancies.");
+
+            setParticipant(participant);
+            System.out.println("Participant registered with success");
+
+            if(this.online){
+                registerParticipantOnline();
+            }
+            else{
+                registerParticipantInPerson();
+            }
+
+        } catch (Exception e) {
+            System.err.println(e.getMessage());
+        }
+    }
+
+    private void registerParticipantOnline() {
+        System.out.println("This is teh link of the event: https://" + location + "/eventCode='" + eventCode + "'");
+    }
+
+    private void registerParticipantInPerson() {
+        System.out.println("This is the number of your seat:" + participants.size());
     }
 
     private void generateCertificate(int id){
         Preconditions.checkArgument(ableParticipants.containsKey(id),
                 "This participant is not able to get the certificate" +
                         "or was not registered.");
-
-        participantsWithCertificate.put(id, ableParticipants.get(id));
-        ableParticipants.remove(id);
-
     }
 
     @Override
@@ -59,7 +96,7 @@ public abstract class Events implements IEvents{
                     " and registration: " + student.getRegistration() + " completed the event " + name + "  and get the certificate.");
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -72,7 +109,7 @@ public abstract class Events implements IEvents{
                     " and teacher code: " + teacher.getCodeTeacher() + " completed the event " + name + "  and get the certificate.");
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
@@ -85,23 +122,82 @@ public abstract class Events implements IEvents{
                     " and external code: " + external.getCodeExternal() + " completed the event " + name + "  and get the certificate.");
 
         } catch (Exception e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
     }
 
-    public void printParticipants(){
+    public static void list(){
+        try{
+            Preconditions.checkArgument(!Events.events.isEmpty(),
+                    "No one event was registered.");
+
+            System.out.println("List os events: ");
+
+            Events.events.forEach((code, event) -> {
+                System.out.println("-" + event.getName() + " -> EventCode: " + code);
+            });
+        }
+        catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+    }
+
+    public static void report() {
+        System.out.println("Courses: ");
+        Events.events.forEach((code, event) -> {
+            if (event instanceof Course)
+                System.out.println("-" + event.getName() + " date: " + event.getDate() + " -> EventCode: " + code);
+        });
+
+        System.out.println("Fairs: ");
+        Events.events.forEach((code, event) -> {
+            if (event instanceof Fair)
+                System.out.println("-" + event.getName() + " date: " + event.getDate() + " -> EventCode: " + code);
+        });
+
+        System.out.println("Lectures: ");
+        Events.events.forEach((code, event) -> {
+            if (event instanceof Lecture)
+                System.out.println("-" + event.getName() + " date: " + event.getDate() + " -> EventCode: " + code);
+        });
+
+        System.out.println("Workshops: ");
+        Events.events.forEach((code, event) -> {
+            if (event instanceof WorkShop)
+                System.out.println("-" + event.getName() + " -> date: " + event.getDate() + " -> EventCode: " + code);
+        });
+
+    }
+
+    public void ListParticipants(){
         try{
             Preconditions.checkArgument(!participants.isEmpty(),
                     "This event has no participants.");
 
-            System.out.println("participants:");
+            System.out.println("List of participants of this event:");
             participants.forEach((id, participant) -> {
-                System.out.println(participant.getName() + " ID: " + id);
+                System.out.println("-" + participant.getName() + " -> ID: " + id);
             });
         }
         catch (Exception  e) {
-            System.out.println(e.getMessage());
+            System.err.println(e.getMessage());
         }
+    }
+
+    @Override
+    public void start() {
+        started = true;
+        System.out.println("The event has started!");
+    }
+
+    @Override
+    public int getEventCode() {
+        return eventCode;
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -110,7 +206,25 @@ public abstract class Events implements IEvents{
     }
 
     @Override
+    public boolean getStarted() { return started; }
+
+    @Override
     public void setAbleParticipant(IParticipants participant) {
-        ableParticipants.put(participant.getId(), participant);
+        try{
+            Preconditions.checkArgument(participants.containsKey(participant.getId()),
+                    "This participant was not registered in this event.");
+            ableParticipants.put(participant.getId(), participant);
+
+            System.out.println("The participant complete the event with success");
+        }
+        catch (Exception e){
+            System.err.println(e.getMessage());
+        }
+
+    }
+
+    @Override
+    public String getDate() {
+        return date;
     }
 }

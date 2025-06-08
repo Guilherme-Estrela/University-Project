@@ -1,8 +1,8 @@
 package participants;
 
 public class External extends Participants{
-    private int codeExternal;
-    private static int codeExternalCount;
+    private int externalCode;
+    private static int externalCodeCount;
 
     public External(String name, String cpf) {
         super(name, cpf);
@@ -11,11 +11,11 @@ public class External extends Participants{
     @Override
     public void register() {
         super.register();
-        codeExternal = codeExternalCount;
-        codeExternalCount++;
+        externalCode = externalCodeCount;
+        externalCodeCount++;
     }
 
     public int getCodeExternal(){
-        return codeExternal;
+        return externalCode;
     }
 }
