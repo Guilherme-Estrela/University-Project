@@ -24,7 +24,6 @@ public class EventMenu {
             System.out.println("║\t" + "5. Register a Exhibitor in a fair.");
             System.out.println("║\t" + "6. Register a presenter in a lecture.");
             System.out.println("║\t" + "7. Start a event.");
-            System.out.println("║\t" + "8. Report.");
             System.out.println("║\t" + "0. Leave");
             System.out.println("╚══════════════════════════════════════════════════════════════════════════════");
             System.out.print("Choose an option: ");

@@ -1,8 +1,6 @@
-package org.example;
+package org.main;
 
 import Administration.University;
-import participants.Participants;
-import participants.Student;
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or
 // click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
