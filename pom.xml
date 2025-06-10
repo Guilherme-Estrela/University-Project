@@ -21,5 +21,18 @@
             <version>33.1.0-jre</version>
         </dependency>
     </dependencies>
-
+<build>
+    <pluginManagement><!-- lock down plugins versions to avoid using Maven defaults (may be moved to parent pom) -->
+        <plugins>
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>1.4.0</version>
+                <configuration>
+                    <mainClass>org.main.Main</mainClass>
+                </configuration>
+            </plugin>
+        </plugins>
+    </pluginManagement>
+    </build>
 </project>
